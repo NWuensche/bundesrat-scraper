@@ -97,9 +97,12 @@ def reformat_top_num2(top_num):
         return str(num) + "."
     except ValueError: # Wenn z.B. 48 a hinter Nummer
         # TODO Hier noch mit a, b,... umgehen
-#        test = '{} {}'.format(top_num[:-1].zfill(3), top_num[-1]) # TODO Ändern
-        test = '{}'.format(top_num[:-1]) # TODO Ändern
-        return test + "."
+        test = '{} {}'.format(top_num[:-1]+ ".", top_num[-1] + ")") # TODO Ändern
+        print("TEST")
+        print(test)
+        #test = '{}'.format(top_num[:-1]) # TODO Ändern
+        #return test + "."
+        return test
 
 def reformat_top_num(top_num):
     try:
@@ -159,19 +162,33 @@ def get_beschluesse_text(session, filename):
         print(current)
         print("next_") #e.g. 003, 3.
         print(next_)
-        current_top = cutter.filter(auto_regex='^{}$'.format(current))
         if('.' in current):#935
-            current_top = cutter.filter(auto_regex='^{}\.$'.format(current[:-1]))
+            if('a)' in current):
+                current_top = cutter.filter(auto_regex='^{}\.$'.format(current.split()[0][:-1])) #Could be 46. or 46. a)-> Just want 46
+            elif(')' in current): #935 - 46. b) -> No 46. in Page anymore
+                current_top = cutter.filter(auto_regex='^{}'.format(current.split()[-1].replace(')', '\\)')))
+            else:
+                current_top = cutter.filter(auto_regex='^{}\.$'.format(current[:-1])) #Could be 46. or 46. a)-> Just want 46
+        else:
+            current_top = cutter.filter(auto_regex='^{}$'.format(current))
 
         print("current_top")
         print(current_top.clean_text())
 
         next_top = None
         if next_ is not None:
-            next_top = cutter.filter(auto_regex='^{}$'.format(next_))
-            if('.' in current):#935
-                next_top = cutter.filter(auto_regex='^{}\.$'.format(next_[:-1]))
-
+            if('.' in next_):#935
+                if('a)' in next_): #935 - 46. a)
+                    next_top = cutter.filter(auto_regex='^{}\.$'.format(next_.split()[0][:-1]))
+                elif(')' in next_): #935 - 46. b)
+                    next_top = cutter.filter(auto_regex='^{}'.format(next_.split()[-1].replace(')', '\\)')))
+                else:
+                    next_top = cutter.filter(auto_regex='^{}\.$'.format(next_[:-1]))
+            else:
+                next_top = cutter.filter(auto_regex='^{}$'.format(next_))
+        if(next_top is not None):
+            print("next_top")
+            print(next_top.clean_text())
 
         senats = cutter.filter(auto_regex='^Senats-?') | cutter.filter(auto_regex='^Beschluss$')
         senats = senats.below(current_top)
