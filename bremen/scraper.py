@@ -98,8 +98,8 @@ def reformat_top_num2(top_num):
     except ValueError: # Wenn z.B. 48 a hinter Nummer
         # TODO Hier noch mit a, b,... umgehen
         test = '{} {}'.format(top_num[:-1]+ ".", top_num[-1] + ")") # TODO Ändern
-        print("TEST")
-        print(test)
+        #print("TEST")
+        #print(test)
         #test = '{}'.format(top_num[:-1]) # TODO Ändern
         #return test + "."
         return test
@@ -129,8 +129,8 @@ def get_reformatted_tops2(top_nums):
 def get_beschluesse_text(session, filename):
     cutter = pdfcutter.PDFCutter(filename=filename)
     debugger = cutter.get_debugger()
-    print("cutter")
-    print(cutter.filter(page=1).clean_text())
+    #print("cutter")
+    #print(cutter.filter(page=1).clean_text())
 
     session_number = session['number']
 
@@ -145,10 +145,10 @@ def get_beschluesse_text(session, filename):
         reformatted_top_nums = get_reformatted_tops(top_nums)
         page_heading = cutter.filter(search='Ergebnisse der {}. Sitzung des Bundesrates'.format(session_number))[0] #Nur bei 962
         page_number = list(cutter.filter(search='1', page=1))[-1]
-    print("top_nums")
-    print(top_nums)
-    print("reformatted_top_nums")
-    print(reformatted_top_nums)
+    #print("top_nums")
+    #print(top_nums)
+    #print("reformatted_top_nums")
+    #print(reformatted_top_nums)
 
     #TODO Hier weiter - Bei 935 statt 001 ist 1. geschrieben
 
@@ -202,7 +202,7 @@ def get_beschluesse_text(session, filename):
             ergebnis_br = ergebnis_br.above(next_top)
             
         senats_text = cutter.all().filter(
-            doc_top__gte=senats.doc_top,
+            doc_top__gte=senats.doc_top -1 ,
             top__gte=page_heading.bottom,
             bottom__lt=page_number.bottom,
             right__lt=column_two #TODO Bei 935 nicht vorhanden
@@ -211,22 +211,27 @@ def get_beschluesse_text(session, filename):
         print(senats_text.right_of(senats).clean_text())
 
         br_text_next_to = cutter.all().filter(
-            doc_top__similar=ergebnis_br.doc_top,#Relativ zu allenSeiten
+            doc_top__gte=ergebnis_br.doc_top,#Relativ zu allenSeiten
             top__gte=page_heading.bottom, #Relativ zu allen
             bottom__lt=page_number.bottom,
             right__lt=column_two #TODO Bei 935 nicht vorhanden
         )
         br_text_under = cutter.all().filter(
-            doc_top__gte=ergebnis_br.doc_top,#Relativ zu allenSeiten
+            doc_top__gte=ergebnis_br.doc_top -1 ,#Relativ zu allenSeiten
             top__gte=page_heading.bottom, #Relativ zu allen
             bottom__lt=page_number.bottom,
             right__lt=column_two #TODO Bei 935 nicht vorhanden
         )
         #TODO NEXT 935 - TOP a), b)
         #TODO NEXT 973 Entscheidungen -> Beschlüsse
-        br_text = br_text_next_to | br_text_under
+#TODO Rein        br_text = br_text_next_to | br_text_under
+        br_text = br_text_under
         print("br_text 2 before")
         print(br_text)
+        print("br_text_next_to")
+        print(br_text_next_to)
+        print("br_text_under")
+        print(br_text_under)
 
         if next_top:
             br_text = br_text.above(next_top)
