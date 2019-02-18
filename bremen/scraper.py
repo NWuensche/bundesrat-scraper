@@ -167,6 +167,9 @@ def get_beschluesse_text(session, filename):
                 current_top = cutter.filter(auto_regex='^{}\.$'.format(current.split()[0][:-1])) #Could be 46. or 46. a)-> Just want 46
             elif(')' in current): #935 - 46. b) -> No 46. in Page anymore
                 current_top = cutter.filter(auto_regex='^{}'.format(current.split()[-1].replace(')', '\\)')))
+                curr_num = current.split()[0]
+                current_num = cutter.filter(auto_regex='^{}$'.format(curr_num))
+                current_top = current_top.below(current_num)[0]
             else:
                 current_top = cutter.filter(auto_regex='^{}\.$'.format(current[:-1])) #Could be 46. or 46. a)-> Just want 46
         else:
@@ -182,6 +185,8 @@ def get_beschluesse_text(session, filename):
                     next_top = cutter.filter(auto_regex='^{}\.$'.format(next_.split()[0][:-1]))
                 elif(')' in next_): #935 - 46. b)
                     next_top = cutter.filter(auto_regex='^{}'.format(next_.split()[-1].replace(')', '\\)')))
+                    next_num = next_.split()[0]
+                    next_top = next_top.below(current_top)[0]
                 else:
                     next_top = cutter.filter(auto_regex='^{}\.$'.format(next_[:-1]))
             else:
